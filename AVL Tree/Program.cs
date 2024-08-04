@@ -5,17 +5,22 @@
         static void Main(string[] args)
         {
             AVLTree<int> tree = new AVLTree<int>();
-            tree.Add(50);
+
             tree.Add(100);
+            tree.Add(50);       
             tree.Add(75);
+            tree.Add(25);
+            tree.Delete(25);
            
-            
-            
-            
-           
-            
-            
-            
+
+
+
+
+
+
+
+
+
             ;
         }
     }
