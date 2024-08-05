@@ -10,8 +10,9 @@
             tree.Add(50);       
             tree.Add(75);
             tree.Add(25);
-            tree.Delete(25);
-           
+            tree.Add(12);
+            tree.Add(6);
+            tree.Delete(100);
 
 
 

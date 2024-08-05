@@ -87,41 +87,49 @@ namespace AVL_Tree
 
         private Node<T> DeleteHelper(Node<T> current, T delete)
         {
-            if (current.Value.Equals(delete))
+            if (delete == null)
+            {
+                return null;
+            }
+
+            if (delete.CompareTo(current.Value) < 0)
+            {
+                current.LeftChild = DeleteHelper(current.LeftChild, delete);
+            }
+            else if (delete.CompareTo(current.Value) > 0)
+            {
+                current.RightChild = DeleteHelper(current.RightChild, delete);
+            }
+            else
             {
 
                 if (current.LeftChild == null && current.RightChild == null)
                 {
-                   
+                    current = null;
+                    return current;
                 }
                 else if (current.LeftChild == null)
                 {
                     current = current.RightChild;
+                    return current;
                 }
                 else if (current.RightChild == null)
                 {
                     current = current.LeftChild;
+                    return current;
                 }
                 else
                 {
                     current.Value = FindMax(current.LeftChild).Value;
                     Delete(current.LeftChild.Value);
                 }
-                
-            }
-            else
-            {
-                if (delete.CompareTo(current.Value) < 0)
-                {
-                    current = DeleteHelper(current.LeftChild, delete);
-                }
-                else if (delete.CompareTo(current.Value) > 0)
-                {
-                    current = DeleteHelper(current.RightChild, delete);
-                }
             }
 
-            return current;
+            UpdateHeight(current);
+
+
+
+            return SelfBalance(current);
 
 
         }
@@ -151,10 +159,8 @@ namespace AVL_Tree
 
             UpdateHeight(node);
 
-            node = SelfBalance(node);
 
-
-            return node;
+            return SelfBalance(node);
 
 
         }
@@ -170,30 +176,30 @@ namespace AVL_Tree
         }
         public void UpdateHeight(Node<T> node)
         {
-            updateChildren(node);
-            int left;
-            int right;
-            if (node.LeftChild == null)
-            {
-                left = 0;
-            }
-            else
-            {
-                left = node.LeftChild.Height;
-            }
-            if(node.RightChild == null)
-            {
-                right = 0;
-            }
-            else
-            {
-                right = node.RightChild.Height;
-            }
+                updateChildren(node);
+                int left;
+                int right;
+                if (node.LeftChild == null)
+                {
+                    left = 0;
+                }
+                else
+                {
+                    left = node.LeftChild.Height;
+                }
+                if(node.RightChild == null)
+                {
+                    right = 0;
+                }
+                else
+                {
+                    right = node.RightChild.Height;
+                }
 
             
-            node.Height = Math.Max(left, right) + 1;
+                node.Height = Math.Max(left, right) + 1;
            
-            node.UpdateBalance();
+                node.UpdateBalance();
             
 
         }
@@ -264,16 +270,16 @@ namespace AVL_Tree
 
         public void updateChildren(Node<T> node)
         {
-            if(node.LeftChild != null)
-            {
-                node.LeftChild.UpdateBalance();
-                UpdateHeight(node.LeftChild);
-            }
-             if(node.RightChild != null)
-            {
-                node.RightChild.UpdateBalance();
-                UpdateHeight(node.RightChild);
-            }
+                if(node.LeftChild != null)
+                {
+                    node.LeftChild.UpdateBalance();
+                    UpdateHeight(node.LeftChild);
+                }
+                 if(node.RightChild != null)
+                {
+                    node.RightChild.UpdateBalance();
+                    UpdateHeight(node.RightChild);
+                }
 
         }
 
