@@ -15,16 +15,16 @@ namespace AVL_Tree
     //AVL Tree should balance a tree around so the each subtree is even
     public class AVLTree<T> where T : IComparable
     {
-        public class Node<T> where T : IComparable
+        public class Node
         {
             public T Value { get; set; }
 
-            public Node<T> LeftChild { get; set; }
-            public Node<T> RightChild { get; set; }
+            public Node LeftChild { get; set; }
+            public Node RightChild { get; set; }
 
             public int Height { get; set; }
             public int Balance = 0;
-            public Node(T value, Node<T> leftChild, Node<T> rightChild)
+            public Node(T value, Node leftChild, Node rightChild)
 
             {
                 Value = value;
@@ -33,7 +33,7 @@ namespace AVL_Tree
                 Height = 1;
             }
 
-            public Node(T value, Node<T> previous)
+            public Node(T value, Node previous)
                : this(value, null, null) { }
             public Node(T value)
               : this(value, null, null) { }
@@ -42,30 +42,30 @@ namespace AVL_Tree
 
             public void UpdateBalance()
             {
-                if(LeftChild == null && RightChild == null)
+                int leftHeight = 0;
+                if (LeftChild != null)
                 {
-                    Balance = 0;
+                    leftHeight = LeftChild.Height;
                 }
-                else if(LeftChild == null)
+
+                int rightHeight = 0;
+            
+                if (RightChild != null)
                 {
-                    Balance = RightChild.Height;
+                    rightHeight = RightChild.Height;
                 }
-                else if(RightChild == null)
-                {
-                    Balance = -LeftChild.Height;
-                }
-                else
-                {
-                    Balance = RightChild.Height - LeftChild.Height;
-                }
-                
+
+
+                Balance = rightHeight - leftHeight;
+               
+
             }
         }
 
 
-        public Node<T> Root { get; private set; }
+        public Node Root { get; private set; }
 
-        public AVLTree(Node<T> val)
+        public AVLTree(Node val)
         {
             Root = val;
         }
@@ -77,15 +77,15 @@ namespace AVL_Tree
 
         public void Add(T val)
         {
-            Root = AddHelper(Root, val);
+            Root = Add(Root, val);
         }
 
         public void Delete(T val)
         {
-            Root = DeleteHelper(Root, val);
+            Root = Delete(Root, val);
         }
 
-        private Node<T> DeleteHelper(Node<T> current, T delete)
+        private Node Delete(Node current, T delete)
         {
             if (delete == null)
             {
@@ -94,54 +94,43 @@ namespace AVL_Tree
 
             if (delete.CompareTo(current.Value) < 0)
             {
-                current.LeftChild = DeleteHelper(current.LeftChild, delete);
+                current.LeftChild = Delete(current.LeftChild, delete);
             }
             else if (delete.CompareTo(current.Value) > 0)
             {
-                current.RightChild = DeleteHelper(current.RightChild, delete);
+                current.RightChild = Delete(current.RightChild, delete);
             }
             else
             {
-
-                if (current.LeftChild == null && current.RightChild == null)
+                if(current.LeftChild == null)
                 {
-                    current = null;
-                    return current;
+                    return current.RightChild;
                 }
-                else if (current.LeftChild == null)
+                else if(current.RightChild == null)
                 {
-                    current = current.RightChild;
-                    return current;
-                }
-                else if (current.RightChild == null)
-                {
-                    current = current.LeftChild;
-                    return current;
+                    return current.LeftChild;
                 }
                 else
                 {
                     current.Value = FindMax(current.LeftChild).Value;
-                    Delete(current.LeftChild.Value);
+                    Delete(FindMax(current.LeftChild),FindMax(current.LeftChild).Value);
                 }
             }
 
             UpdateHeight(current);
 
-
-
             return SelfBalance(current);
-
 
         }
 
-     
 
-        private Node<T> AddHelper(Node<T> node, T val)
+
+        private Node Add(Node node, T val)
         {
 
             if (node == null)
             {
-                Node<T> temp = new Node<T>(val);
+                Node temp = new Node(val);
                 node = temp;
                 return node;
             }
@@ -149,12 +138,12 @@ namespace AVL_Tree
             if (val.CompareTo(node.Value) < 0)
             {
 
-                node.LeftChild = AddHelper(node.LeftChild, val);
+                node.LeftChild = Add(node.LeftChild, val);
 
             }
             else if (val.CompareTo(node.Value) > 0)
             {
-                node.RightChild = AddHelper(node.RightChild, val);
+                node.RightChild = Add(node.RightChild, val);
             }
 
             UpdateHeight(node);
@@ -165,117 +154,95 @@ namespace AVL_Tree
 
         }
 
-        public Node<T> FindMax(Node<T> start)
+        public Node FindMax(Node start)
         {
-            Node<T> current = start;
+            Node current = start;
             while (current.RightChild != null)
             {
                 current = current.RightChild;
             }
             return current;
         }
-        public void UpdateHeight(Node<T> node)
+        public void UpdateHeight(Node node)
         {
-                updateChildren(node);
-                int left;
-                int right;
-                if (node.LeftChild == null)
-                {
-                    left = 0;
-                }
-                else
-                {
-                    left = node.LeftChild.Height;
-                }
-                if(node.RightChild == null)
-                {
-                    right = 0;
-                }
-                else
-                {
-                    right = node.RightChild.Height;
-                }
-
-            
-                node.Height = Math.Max(left, right) + 1;
-           
-                node.UpdateBalance();
-            
-
-        }
-
-        public Node<T> SelfBalance(Node<T> node)
-        {
-            Node<T> child = node;
-            if (node.Balance >= -1 || node.Balance <= 1)
+            if(node == null)
             {
-                Node<T> swap = FindSwap(Root);
-                if (node.Balance > 1)
-                {
-                    child = swap.RightChild;
-                    if (child.Balance < 0)
-                    {
-                        swap.RightChild = child.LeftChild;
-                        RotateRight(child);
-                        UpdateHeight(swap.RightChild);
-                        UpdateHeight(swap);
-
-                    }
-
-                    child = swap.RightChild;
-                    RotateLeft(swap);
-                }
-                else if (node.Balance < -1)
-                {
-                    child = swap.LeftChild;
-                    if (child.Balance > 0)
-                    {
-                        swap.LeftChild = child.RightChild;
-                        RotateLeft(child);
-                        UpdateHeight(swap.LeftChild);
-                        UpdateHeight(swap);
-                    }
-
-                    child = swap.LeftChild;
-                    RotateRight(swap);
-                }
-                UpdateHeight(swap);
-                UpdateHeight(child);
+                return;
             }
-            
-            return child;
-        }
-
-        public Node<T> FindSwap(Node<T> current)
-        {
-            Node<T> temp = new Node<T>();
-            if(current.Balance != -2 && current.Balance != 2)
+            updateChildren(node);
+            int left;
+            int right;
+            if (node.LeftChild == null)
             {
-                if (current.RightChild != null)
-                {
-                    temp = FindSwap(current.RightChild);
-                }
-                if (current.LeftChild != null)
-                {
-                    temp = FindSwap(current.LeftChild);
-                }
-               
+                left = 0;
             }
             else
             {
-                temp = current;
+                left = node.LeftChild.Height;
             }
-            return temp;
+            if (node.RightChild == null)
+            {
+                right = 0;
+            }
+            else
+            {
+                right = node.RightChild.Height;
+            }
+
+
+            node.Height = Math.Max(left, right) + 1;
+
+            node.UpdateBalance();
+
+
         }
 
-        public void updateChildren(Node<T> node)
+
+
+        public Node SelfBalance(Node node)
         {
-                if(node.LeftChild != null)
+            if (node.Balance > 1)
+            {
+                if (node.RightChild.Balance < 0)
+                {
+
+                    node.RightChild = RotateRight(node.RightChild);
+
+                }
+
+
+                node = RotateLeft(node);
+            }
+            else if (node.Balance < -1)
+            {
+                if (node.LeftChild.Balance > 0)
+                {
+
+                    node.LeftChild = RotateLeft(node.LeftChild);
+
+                }
+
+                node = RotateRight(node);
+            }
+
+            UpdateHeight(node);
+
+
+            return node;
+        }
+
+        public void updateChildren(Node node)
+        {
+           /* if (node == null)
+            {
+                return;
+            }*/
+                if (node.LeftChild != null)
                 {
                     node.LeftChild.UpdateBalance();
                     UpdateHeight(node.LeftChild);
                 }
-                 if(node.RightChild != null)
+                if (node.RightChild != null)
                 {
                     node.RightChild.UpdateBalance();
                     UpdateHeight(node.RightChild);
@@ -284,27 +251,36 @@ namespace AVL_Tree
         }
 
         //occurs when leaning right
-        public void RotateLeft(Node<T> node)
+        public Node RotateLeft(Node node)
         {
-            Node<T> swap = node;
-    
+            Node swap = node;
+
             node = node.RightChild;
-            Node<T> temp = node.LeftChild;
+            Node temp = node.LeftChild;
             node.LeftChild = swap;
             node.LeftChild.RightChild = temp;
-            
 
-    
+            UpdateHeight(node.LeftChild);
+            UpdateHeight(node.LeftChild.RightChild);
+
+
+            return node;
         }
 
         //occurs when leaning left
-        public void RotateRight(Node<T> node)
+        public Node RotateRight(Node node)
         {
-            Node<T> swap = node;
+            Node swap = node;
+
             node = node.LeftChild;
-            Node<T> temp = node.RightChild;
+            Node temp = node.RightChild;
             node.RightChild = swap;
             node.RightChild.LeftChild = temp;
+
+            UpdateHeight(node.RightChild);
+            UpdateHeight(node.RightChild.LeftChild);
+
+            return node;
         }
 
     }
@@ -312,7 +288,7 @@ namespace AVL_Tree
 }
 
 
-       
 
 
- 
+
+
